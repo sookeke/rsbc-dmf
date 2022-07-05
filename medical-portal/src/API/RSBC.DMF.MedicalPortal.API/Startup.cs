@@ -27,6 +27,9 @@ using System.Threading.Tasks;
 using System.Reflection;
 using Grpc.Net.Client;
 using Pssg.DocumentStorageAdapter;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Runtime.Serialization;
+using Microsoft.OpenApi.Any;
 
 namespace RSBC.DMF.MedicalPortal.API
 {
@@ -107,17 +110,23 @@ namespace RSBC.DMF.MedicalPortal.API
                     policy.RequireClaim("scope", "doctors-portal-api");
                 });
             });
+
+
             services.AddControllers(options =>
             {
                 options.Filters.Add(new HttpResponseExceptionFilter());
-            });
+            });                
+
             services.AddSwaggerGen(c =>
             {
                 // add Xml comments to the swagger docs
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlPath));
+                c.SchemaFilter<EnumTypesSchemaFilter>(xmlPath);
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "RSBC.DMF.MedicalPortal.API", Version = "v1" });
-            });
+            });            
+
             var dpBuilder = services.AddDataProtection();
             var keyRingPath = configuration.GetValue("DATAPROTECTION__PATH", string.Empty);
             if (!string.IsNullOrWhiteSpace(keyRingPath))
@@ -298,4 +307,5 @@ namespace RSBC.DMF.MedicalPortal.API
                         ? LogEventLevel.Verbose
                         : LogEventLevel.Information;
     }
+
 }

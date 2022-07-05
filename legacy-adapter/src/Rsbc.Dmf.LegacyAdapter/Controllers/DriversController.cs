@@ -160,11 +160,11 @@ namespace Rsbc.Dmf.LegacyAdapter.Controllers
 
             var result = _cmsAdapterClient.CreateLegacyCaseComment(new LegacyComment()
             {
-                CaseId = comment.CaseId,
-                CommentText = comment.CommentText,
-                CommentTypeCode = comment.CommentTypeCode,
+                CaseId = comment.CaseId ?? String.Empty,
+                CommentText = comment.CommentText ?? String.Empty,
+                CommentTypeCode = comment.CommentTypeCode ?? String.Empty,
                 SequenceNumber = comment.SequenceNumber,
-                UserId = comment.UserId,
+                UserId = comment.UserId ?? String.Empty,
                 CommentDate = Timestamp.FromDateTimeOffset(comment.CommentDate),
                 Driver = driver
             });
@@ -223,7 +223,9 @@ namespace Rsbc.Dmf.LegacyAdapter.Controllers
                     result.Add(new ViewModels.Document
                     {
                         CaseId = item.CaseId,
-                        DocumentDate = item.DocumentDate.ToDateTimeOffset(),
+                        FaxReceivedDate = item.FaxReceivedDate.ToDateTimeOffset(),
+                        ImportDate = item.ImportDate.ToDateTimeOffset(),
+
                         DocumentId = item.DocumentId,
                         FileContents = data,                        
                         Driver = driver,
@@ -268,7 +270,8 @@ namespace Rsbc.Dmf.LegacyAdapter.Controllers
                 CaseId = document.CaseId,                
                 SequenceNumber = document.SequenceNumber,
                 UserId = document.UserId,
-                DocumentDate = Timestamp.FromDateTimeOffset(document.DocumentDate),
+                FaxReceivedDate = Timestamp.FromDateTimeOffset(document.FaxReceivedDate),
+                ImportDate = Timestamp.FromDateTimeOffset(document.ImportDate),
                 Driver = driver
 
             });

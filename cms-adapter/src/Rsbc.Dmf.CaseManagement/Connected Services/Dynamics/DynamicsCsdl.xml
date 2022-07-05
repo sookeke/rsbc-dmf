@@ -1759,6 +1759,12 @@
         <NavigationProperty Name="regardingobjectid_dfp_dmfcasebusinessprocessflow" Type="mscrm.dfp_dmfcasebusinessprocessflow" Nullable="false" Partner="dfp_dmfcasebusinessprocessflow_AsyncOperations">
           <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="businessprocessflowinstanceid" />
         </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_role" Type="mscrm.dfp_role" Nullable="false" Partner="dfp_role_AsyncOperations">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_roleid" />
+        </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_permission" Type="mscrm.dfp_permission" Nullable="false" Partner="dfp_permission_AsyncOperations">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_permissionid" />
+        </NavigationProperty>
         <NavigationProperty Name="regardingobjectid_report" Type="mscrm.report" Nullable="false" Partner="Report_AsyncOperations">
           <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="reportid" />
         </NavigationProperty>
@@ -2100,6 +2106,7 @@
         <Property Name="dfp_documentorigin" Type="Edm.Int32" />
         <Property Name="dfp_faxsender" Type="Edm.String" Unicode="false" />
         <Property Name="dfp_priority" Type="Edm.Int32" />
+        <Property Name="dfp_batchid" Type="Edm.String" Unicode="false" />
         <Property Name="_bcgov_customer_value" Type="Edm.Guid" />
         <Property Name="dfp_duedate" Type="Edm.DateTimeOffset" />
         <Property Name="_dfp_privacyid_value" Type="Edm.Guid" />
@@ -2111,11 +2118,13 @@
         <Property Name="_dfp_documenttypeid_value" Type="Edm.Guid" />
         <Property Name="bcgov_documenturlid" Type="Edm.Guid" />
         <Property Name="_bcgov_tag1id_value" Type="Edm.Guid" />
+        <Property Name="dfp_validationmethod" Type="Edm.String" Unicode="false" />
         <Property Name="dfp_reasonforextension2" Type="Edm.String" Unicode="false" />
         <Property Name="bcgov_receiveddate" Type="Edm.DateTimeOffset" />
         <Property Name="dfp_faxnumber" Type="Edm.String" Unicode="false" />
         <Property Name="dfp_solicited" Type="Edm.Boolean" />
         <Property Name="_modifiedonbehalfby_value" Type="Edm.Guid" />
+        <Property Name="dfp_documentpages" Type="Edm.String" Unicode="false" />
         <Property Name="dfp_extendeddays2" Type="Edm.Int32" />
         <Property Name="_dfp_xsstatuscodeid_value" Type="Edm.Guid" />
         <Property Name="dfp_priorityscore" Type="Edm.Int32" />
@@ -2125,7 +2134,9 @@
         <Property Name="dfp_dayspastduedate" Type="Edm.Int32" />
         <Property Name="_bcgov_letterid_value" Type="Edm.Guid" />
         <Property Name="dfp_faxtimestamp" Type="Edm.DateTimeOffset" />
+        <Property Name="dfp_validationprevious" Type="Edm.String" Unicode="false" />
         <Property Name="bcgov_url" Type="Edm.String" Unicode="false" />
+        <Property Name="dfp_importid" Type="Edm.String" Unicode="false" />
         <NavigationProperty Name="createdby" Type="mscrm.systemuser" Nullable="false" Partner="lk_bcgov_documenturl_createdby">
           <ReferentialConstraint Property="_createdby_value" ReferencedProperty="systemuserid" />
         </NavigationProperty>
@@ -3513,6 +3524,12 @@
         <NavigationProperty Name="regardingobjectid_dfp_dmfcasebusinessprocessflow" Type="mscrm.dfp_dmfcasebusinessprocessflow" Nullable="false" Partner="dfp_dmfcasebusinessprocessflow_BulkDeleteFailures">
           <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="businessprocessflowinstanceid" />
         </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_role" Type="mscrm.dfp_role" Nullable="false" Partner="dfp_role_BulkDeleteFailures">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_roleid" />
+        </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_permission" Type="mscrm.dfp_permission" Nullable="false" Partner="dfp_permission_BulkDeleteFailures">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_permissionid" />
+        </NavigationProperty>
         <NavigationProperty Name="regardingobjectid_customeraddress" Type="mscrm.customeraddress" Nullable="false" Partner="CustomerAddress_BulkDeleteFailures">
           <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="customeraddressid" />
         </NavigationProperty>
@@ -3991,6 +4008,7 @@
         <NavigationProperty Name="dfp_businessunit_bcgov_documenturl" Type="Collection(mscrm.bcgov_documenturl)" Partner="dfp_BusinessUnitID" />
         <NavigationProperty Name="business_unit_dfp_comment" Type="Collection(mscrm.dfp_comment)" Partner="owningbusinessunit" />
         <NavigationProperty Name="business_unit_dfp_documentextension" Type="Collection(mscrm.dfp_documentextension)" Partner="owningbusinessunit" />
+        <NavigationProperty Name="business_unit_dfp_role" Type="Collection(mscrm.dfp_role)" Partner="owningbusinessunit" />
         <NavigationProperty Name="BusinessUnit_SyncErrors" Type="Collection(mscrm.syncerror)" Partner="regardingobjectid_businessunit_syncerror" />
         <NavigationProperty Name="transactioncurrencyid" Type="mscrm.transactioncurrency" Nullable="false" Partner="TransactionCurrency_BusinessUnit">
           <ReferentialConstraint Property="_transactioncurrencyid_value" ReferencedProperty="transactioncurrencyid" />
@@ -6414,26 +6432,27 @@
         <Key>
           <PropertyRef Name="dfp_dmerflagid" />
         </Key>
-        <Property Name="dfp_name" Type="Edm.String" Unicode="false" />
-        <Property Name="_createdby_value" Type="Edm.Guid" />
-        <Property Name="utcconversiontimezonecode" Type="Edm.Int32" />
-        <Property Name="dfp_dmerflagid" Type="Edm.Guid" />
+        <Property Name="modifiedon" Type="Edm.DateTimeOffset" />
         <Property Name="_createdonbehalfby_value" Type="Edm.Guid" />
-        <Property Name="_dfp_caseid_value" Type="Edm.Guid" />
+        <Property Name="statecode" Type="Edm.Int32" />
         <Property Name="_modifiedby_value" Type="Edm.Guid" />
         <Property Name="_dfp_driver_value" Type="Edm.Guid" />
-        <Property Name="statuscode" Type="Edm.Int32" />
-        <Property Name="modifiedon" Type="Edm.DateTimeOffset" />
-        <Property Name="statecode" Type="Edm.Int32" />
         <Property Name="versionnumber" Type="Edm.Int64" />
-        <Property Name="_dfp_flagid_value" Type="Edm.Guid" />
-        <Property Name="timezoneruleversionnumber" Type="Edm.Int32" />
-        <Property Name="overriddencreatedon" Type="Edm.DateTimeOffset" />
         <Property Name="_modifiedonbehalfby_value" Type="Edm.Guid" />
-        <Property Name="createdon" Type="Edm.DateTimeOffset" />
-        <Property Name="_organizationid_value" Type="Edm.Guid" />
+        <Property Name="_dfp_flagid_value" Type="Edm.Guid" />
         <Property Name="importsequencenumber" Type="Edm.Int32" />
+        <Property Name="_dfp_caseid_value" Type="Edm.Guid" />
+        <Property Name="dfp_dmerflagid" Type="Edm.Guid" />
+        <Property Name="timezoneruleversionnumber" Type="Edm.Int32" />
         <Property Name="dfp_description" Type="Edm.String" Unicode="false" />
+        <Property Name="createdon" Type="Edm.DateTimeOffset" />
+        <Property Name="_createdby_value" Type="Edm.Guid" />
+        <Property Name="statuscode" Type="Edm.Int32" />
+        <Property Name="_organizationid_value" Type="Edm.Guid" />
+        <Property Name="utcconversiontimezonecode" Type="Edm.Int32" />
+        <Property Name="overriddencreatedon" Type="Edm.DateTimeOffset" />
+        <Property Name="dfp_origin" Type="Edm.Int32" />
+        <Property Name="dfp_name" Type="Edm.String" Unicode="false" />
         <NavigationProperty Name="createdby" Type="mscrm.systemuser" Nullable="false" Partner="lk_dfp_dmerflag_createdby">
           <ReferentialConstraint Property="_createdby_value" ReferencedProperty="systemuserid" />
         </NavigationProperty>
@@ -6918,6 +6937,7 @@
         <NavigationProperty Name="dfp_DriverId" Type="mscrm.dfp_driver" Nullable="false" Partner="dfp_driver_dfp_login">
           <ReferentialConstraint Property="_dfp_driverid_value" ReferencedProperty="dfp_driverid" />
         </NavigationProperty>
+        <NavigationProperty Name="dfp_login_dfp_role" Type="Collection(mscrm.dfp_role)" Partner="dfp_LoginId" />
       </EntityType>
       <EntityType Name="dfp_medicalcondition" BaseType="mscrm.crmbaseentity">
         <Key>
@@ -7265,6 +7285,54 @@
           <ReferentialConstraint Property="_dfp_caseid_value" ReferencedProperty="incidentid" />
         </NavigationProperty>
       </EntityType>
+      <EntityType Name="dfp_permission" BaseType="mscrm.crmbaseentity">
+        <Key>
+          <PropertyRef Name="dfp_permissionid" />
+        </Key>
+        <Property Name="createdon" Type="Edm.DateTimeOffset" />
+        <Property Name="utcconversiontimezonecode" Type="Edm.Int32" />
+        <Property Name="_organizationid_value" Type="Edm.Guid" />
+        <Property Name="dfp_name" Type="Edm.String" Unicode="false" />
+        <Property Name="importsequencenumber" Type="Edm.Int32" />
+        <Property Name="statecode" Type="Edm.Int32" />
+        <Property Name="overriddencreatedon" Type="Edm.DateTimeOffset" />
+        <Property Name="dfp_haspermission" Type="Edm.Boolean" />
+        <Property Name="_dfp_roleid_value" Type="Edm.Guid" />
+        <Property Name="modifiedon" Type="Edm.DateTimeOffset" />
+        <Property Name="_modifiedby_value" Type="Edm.Guid" />
+        <Property Name="_modifiedonbehalfby_value" Type="Edm.Guid" />
+        <Property Name="dfp_type" Type="Edm.Int32" />
+        <Property Name="_createdby_value" Type="Edm.Guid" />
+        <Property Name="dfp_permissionid" Type="Edm.Guid" />
+        <Property Name="versionnumber" Type="Edm.Int64" />
+        <Property Name="timezoneruleversionnumber" Type="Edm.Int32" />
+        <Property Name="_createdonbehalfby_value" Type="Edm.Guid" />
+        <Property Name="statuscode" Type="Edm.Int32" />
+        <NavigationProperty Name="createdby" Type="mscrm.systemuser" Nullable="false" Partner="lk_dfp_permission_createdby">
+          <ReferentialConstraint Property="_createdby_value" ReferencedProperty="systemuserid" />
+        </NavigationProperty>
+        <NavigationProperty Name="createdonbehalfby" Type="mscrm.systemuser" Nullable="false" Partner="lk_dfp_permission_createdonbehalfby">
+          <ReferentialConstraint Property="_createdonbehalfby_value" ReferencedProperty="systemuserid" />
+        </NavigationProperty>
+        <NavigationProperty Name="modifiedby" Type="mscrm.systemuser" Nullable="false" Partner="lk_dfp_permission_modifiedby">
+          <ReferentialConstraint Property="_modifiedby_value" ReferencedProperty="systemuserid" />
+        </NavigationProperty>
+        <NavigationProperty Name="modifiedonbehalfby" Type="mscrm.systemuser" Nullable="false" Partner="lk_dfp_permission_modifiedonbehalfby">
+          <ReferentialConstraint Property="_modifiedonbehalfby_value" ReferencedProperty="systemuserid" />
+        </NavigationProperty>
+        <NavigationProperty Name="organizationid" Type="mscrm.organization" Nullable="false" Partner="organization_dfp_permission">
+          <ReferentialConstraint Property="_organizationid_value" ReferencedProperty="organizationid" />
+        </NavigationProperty>
+        <NavigationProperty Name="dfp_permission_SyncErrors" Type="Collection(mscrm.syncerror)" Partner="regardingobjectid_dfp_permission" />
+        <NavigationProperty Name="dfp_permission_AsyncOperations" Type="Collection(mscrm.asyncoperation)" Partner="regardingobjectid_dfp_permission" />
+        <NavigationProperty Name="dfp_permission_MailboxTrackingFolders" Type="Collection(mscrm.mailboxtrackingfolder)" Partner="regardingobjectid_dfp_permission" />
+        <NavigationProperty Name="dfp_permission_ProcessSession" Type="Collection(mscrm.processsession)" Partner="regardingobjectid_dfp_permission" />
+        <NavigationProperty Name="dfp_permission_BulkDeleteFailures" Type="Collection(mscrm.bulkdeletefailure)" Partner="regardingobjectid_dfp_permission" />
+        <NavigationProperty Name="dfp_permission_PrincipalObjectAttributeAccesses" Type="Collection(mscrm.principalobjectattributeaccess)" Partner="objectid_dfp_permission" />
+        <NavigationProperty Name="dfp_RoleId" Type="mscrm.dfp_role" Nullable="false" Partner="dfp_role_dfp_permission">
+          <ReferentialConstraint Property="_dfp_roleid_value" ReferencedProperty="dfp_roleid" />
+        </NavigationProperty>
+      </EntityType>
       <EntityType Name="dfp_privacy" BaseType="mscrm.crmbaseentity">
         <Key>
           <PropertyRef Name="dfp_privacyid" />
@@ -7309,6 +7377,66 @@
         <NavigationProperty Name="dfp_privacy_BulkDeleteFailures" Type="Collection(mscrm.bulkdeletefailure)" Partner="regardingobjectid_dfp_privacy" />
         <NavigationProperty Name="dfp_privacy_PrincipalObjectAttributeAccesses" Type="Collection(mscrm.principalobjectattributeaccess)" Partner="objectid_dfp_privacy" />
         <NavigationProperty Name="dfp_privacy_bcgov_documenturl" Type="Collection(mscrm.bcgov_documenturl)" Partner="dfp_PrivacyID" />
+      </EntityType>
+      <EntityType Name="dfp_role" BaseType="mscrm.crmbaseentity">
+        <Key>
+          <PropertyRef Name="dfp_roleid" />
+        </Key>
+        <Property Name="_ownerid_value" Type="Edm.Guid" />
+        <Property Name="_owningbusinessunit_value" Type="Edm.Guid" />
+        <Property Name="createdon" Type="Edm.DateTimeOffset" />
+        <Property Name="_modifiedby_value" Type="Edm.Guid" />
+        <Property Name="_createdby_value" Type="Edm.Guid" />
+        <Property Name="_createdonbehalfby_value" Type="Edm.Guid" />
+        <Property Name="_owninguser_value" Type="Edm.Guid" />
+        <Property Name="versionnumber" Type="Edm.Int64" />
+        <Property Name="dfp_name" Type="Edm.String" Unicode="false" />
+        <Property Name="importsequencenumber" Type="Edm.Int32" />
+        <Property Name="dfp_roleid" Type="Edm.Guid" />
+        <Property Name="dfp_type" Type="Edm.Int32" />
+        <Property Name="statuscode" Type="Edm.Int32" />
+        <Property Name="utcconversiontimezonecode" Type="Edm.Int32" />
+        <Property Name="overriddencreatedon" Type="Edm.DateTimeOffset" />
+        <Property Name="_modifiedonbehalfby_value" Type="Edm.Guid" />
+        <Property Name="statecode" Type="Edm.Int32" />
+        <Property Name="timezoneruleversionnumber" Type="Edm.Int32" />
+        <Property Name="_dfp_loginid_value" Type="Edm.Guid" />
+        <Property Name="_owningteam_value" Type="Edm.Guid" />
+        <Property Name="modifiedon" Type="Edm.DateTimeOffset" />
+        <NavigationProperty Name="createdby" Type="mscrm.systemuser" Nullable="false" Partner="lk_dfp_role_createdby">
+          <ReferentialConstraint Property="_createdby_value" ReferencedProperty="systemuserid" />
+        </NavigationProperty>
+        <NavigationProperty Name="createdonbehalfby" Type="mscrm.systemuser" Nullable="false" Partner="lk_dfp_role_createdonbehalfby">
+          <ReferentialConstraint Property="_createdonbehalfby_value" ReferencedProperty="systemuserid" />
+        </NavigationProperty>
+        <NavigationProperty Name="modifiedby" Type="mscrm.systemuser" Nullable="false" Partner="lk_dfp_role_modifiedby">
+          <ReferentialConstraint Property="_modifiedby_value" ReferencedProperty="systemuserid" />
+        </NavigationProperty>
+        <NavigationProperty Name="modifiedonbehalfby" Type="mscrm.systemuser" Nullable="false" Partner="lk_dfp_role_modifiedonbehalfby">
+          <ReferentialConstraint Property="_modifiedonbehalfby_value" ReferencedProperty="systemuserid" />
+        </NavigationProperty>
+        <NavigationProperty Name="owninguser" Type="mscrm.systemuser" Nullable="false" Partner="user_dfp_role">
+          <ReferentialConstraint Property="_owninguser_value" ReferencedProperty="systemuserid" />
+        </NavigationProperty>
+        <NavigationProperty Name="owningteam" Type="mscrm.team" Nullable="false" Partner="team_dfp_role">
+          <ReferentialConstraint Property="_owningteam_value" ReferencedProperty="teamid" />
+        </NavigationProperty>
+        <NavigationProperty Name="ownerid" Type="mscrm.principal" Nullable="false" Partner="owner_dfp_role">
+          <ReferentialConstraint Property="_ownerid_value" ReferencedProperty="ownerid" />
+        </NavigationProperty>
+        <NavigationProperty Name="owningbusinessunit" Type="mscrm.businessunit" Nullable="false" Partner="business_unit_dfp_role">
+          <ReferentialConstraint Property="_owningbusinessunit_value" ReferencedProperty="businessunitid" />
+        </NavigationProperty>
+        <NavigationProperty Name="dfp_role_SyncErrors" Type="Collection(mscrm.syncerror)" Partner="regardingobjectid_dfp_role" />
+        <NavigationProperty Name="dfp_role_AsyncOperations" Type="Collection(mscrm.asyncoperation)" Partner="regardingobjectid_dfp_role" />
+        <NavigationProperty Name="dfp_role_MailboxTrackingFolders" Type="Collection(mscrm.mailboxtrackingfolder)" Partner="regardingobjectid_dfp_role" />
+        <NavigationProperty Name="dfp_role_ProcessSession" Type="Collection(mscrm.processsession)" Partner="regardingobjectid_dfp_role" />
+        <NavigationProperty Name="dfp_role_BulkDeleteFailures" Type="Collection(mscrm.bulkdeletefailure)" Partner="regardingobjectid_dfp_role" />
+        <NavigationProperty Name="dfp_role_PrincipalObjectAttributeAccesses" Type="Collection(mscrm.principalobjectattributeaccess)" Partner="objectid_dfp_role" />
+        <NavigationProperty Name="dfp_LoginId" Type="mscrm.dfp_login" Nullable="false" Partner="dfp_login_dfp_role">
+          <ReferentialConstraint Property="_dfp_loginid_value" ReferencedProperty="dfp_loginid" />
+        </NavigationProperty>
+        <NavigationProperty Name="dfp_role_dfp_permission" Type="Collection(mscrm.dfp_permission)" Partner="dfp_RoleId" />
       </EntityType>
       <EntityType Name="dfp_submittaltype" BaseType="mscrm.crmbaseentity">
         <Key>
@@ -10184,7 +10312,7 @@
         <Property Name="_existingcase_value" Type="Edm.Guid" />
         <Property Name="_primarycontactid_value" Type="Edm.Guid" />
         <Property Name="dfp_flagschecked" Type="Edm.Boolean" />
-        <Property Name="productserialnumber" Type="Edm.String" Unicode="false" />
+        <Property Name="dfp_edmerstarted" Type="Edm.Boolean" />
         <Property Name="lastonholdtime" Type="Edm.DateTimeOffset" />
         <Property Name="createdon" Type="Edm.DateTimeOffset" />
         <Property Name="timezoneruleversionnumber" Type="Edm.Int32" />
@@ -10199,6 +10327,7 @@
         <Property Name="_contractid_value" Type="Edm.Guid" />
         <Property Name="_masterid_value" Type="Edm.Guid" />
         <Property Name="entityimage_url" Type="Edm.String" Unicode="false" />
+        <Property Name="dfp_isnoncompliant" Type="Edm.Boolean" />
         <Property Name="_transactioncurrencyid_value" Type="Edm.Guid" />
         <Property Name="_createdby_value" Type="Edm.Guid" />
         <Property Name="routecase" Type="Edm.Boolean" />
@@ -10233,6 +10362,7 @@
         <Property Name="_parentcaseid_value" Type="Edm.Guid" />
         <Property Name="modifiedon" Type="Edm.DateTimeOffset" />
         <Property Name="incidentid" Type="Edm.Guid" />
+        <Property Name="customersatisfactioncode" Type="Edm.Int32" />
         <Property Name="escalatedon" Type="Edm.DateTimeOffset" />
         <Property Name="casetypecode" Type="Edm.Int32" />
         <Property Name="resolvebyslastatus" Type="Edm.Int32" />
@@ -10248,7 +10378,7 @@
         <Property Name="actualserviceunits" Type="Edm.Int32" />
         <Property Name="isdecrementing" Type="Edm.Boolean" />
         <Property Name="dfp_decisioncreated" Type="Edm.Boolean" />
-        <Property Name="customersatisfactioncode" Type="Edm.Int32" />
+        <Property Name="productserialnumber" Type="Edm.String" Unicode="false" />
         <Property Name="_dfp_driverid_value" Type="Edm.Guid" />
         <Property Name="_kbarticleid_value" Type="Edm.Guid" />
         <Property Name="firstresponsesent" Type="Edm.Boolean" />
@@ -12482,6 +12612,12 @@
         <NavigationProperty Name="regardingobjectid_dfp_dmfcasebusinessprocessflow" Type="mscrm.dfp_dmfcasebusinessprocessflow" Nullable="false" Partner="dfp_dmfcasebusinessprocessflow_MailboxTrackingFolders">
           <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="businessprocessflowinstanceid" />
         </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_role" Type="mscrm.dfp_role" Nullable="false" Partner="dfp_role_MailboxTrackingFolders">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_roleid" />
+        </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_permission" Type="mscrm.dfp_permission" Nullable="false" Partner="dfp_permission_MailboxTrackingFolders">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_permissionid" />
+        </NavigationProperty>
         <NavigationProperty Name="modifiedonbehalfby" Type="mscrm.systemuser" Nullable="false" Partner="lk_mailboxtrackingfolder_modifiedonbehalfby">
           <ReferentialConstraint Property="_modifiedonbehalfby_value" ReferencedProperty="systemuserid" />
         </NavigationProperty>
@@ -14445,6 +14581,7 @@
         <NavigationProperty Name="organization_dfp_privacy" Type="Collection(mscrm.dfp_privacy)" Partner="organizationid" />
         <NavigationProperty Name="organization_dfp_xsstatuscode" Type="Collection(mscrm.dfp_xsstatuscode)" Partner="organizationid" />
         <NavigationProperty Name="organization_dfp_dmfcasebusinessprocessflow" Type="Collection(mscrm.dfp_dmfcasebusinessprocessflow)" Partner="organizationid" />
+        <NavigationProperty Name="organization_dfp_permission" Type="Collection(mscrm.dfp_permission)" Partner="organizationid" />
         <NavigationProperty Name="modifiedonbehalfby" Type="mscrm.systemuser" Nullable="false" Partner="lk_organization_modifiedonbehalfby">
           <ReferentialConstraint Property="_modifiedonbehalfby_value" ReferencedProperty="systemuserid" />
         </NavigationProperty>
@@ -14641,6 +14778,7 @@
         <NavigationProperty Name="owner_dfp_submittaltype" Type="Collection(mscrm.dfp_submittaltype)" Partner="ownerid" />
         <NavigationProperty Name="owner_dfp_comment" Type="Collection(mscrm.dfp_comment)" Partner="ownerid" />
         <NavigationProperty Name="owner_dfp_documentextension" Type="Collection(mscrm.dfp_documentextension)" Partner="ownerid" />
+        <NavigationProperty Name="owner_dfp_role" Type="Collection(mscrm.dfp_role)" Partner="ownerid" />
         <NavigationProperty Name="owner_personaldocumenttemplates" Type="Collection(mscrm.personaldocumenttemplate)" Partner="ownerid" />
         <NavigationProperty Name="owner_accounts" Type="Collection(mscrm.account)" Partner="ownerid" />
         <NavigationProperty Name="owner_goalrollupquery" Type="Collection(mscrm.goalrollupquery)" Partner="ownerid" />
@@ -15828,6 +15966,12 @@
         <NavigationProperty Name="objectid_dfp_dmfcasebusinessprocessflow" Type="mscrm.dfp_dmfcasebusinessprocessflow" Nullable="false" Partner="dfp_dmfcasebusinessprocessflow_PrincipalObjectAttributeAccesses">
           <ReferentialConstraint Property="_objectid_value" ReferencedProperty="businessprocessflowinstanceid" />
         </NavigationProperty>
+        <NavigationProperty Name="objectid_dfp_role" Type="mscrm.dfp_role" Nullable="false" Partner="dfp_role_PrincipalObjectAttributeAccesses">
+          <ReferentialConstraint Property="_objectid_value" ReferencedProperty="dfp_roleid" />
+        </NavigationProperty>
+        <NavigationProperty Name="objectid_dfp_permission" Type="mscrm.dfp_permission" Nullable="false" Partner="dfp_permission_PrincipalObjectAttributeAccesses">
+          <ReferentialConstraint Property="_objectid_value" ReferencedProperty="dfp_permissionid" />
+        </NavigationProperty>
         <NavigationProperty Name="objectid_letter" Type="mscrm.letter" Nullable="false" Partner="letter_principalobjectattributeaccess" />
         <NavigationProperty Name="objectid_reportcategory" Type="mscrm.reportcategory" Nullable="false" Partner="reportcategory_principalobjectattributeaccess">
           <ReferentialConstraint Property="_objectid_value" ReferencedProperty="reportcategoryid" />
@@ -16218,6 +16362,12 @@
         </NavigationProperty>
         <NavigationProperty Name="regardingobjectid_dfp_dmfcasebusinessprocessflow" Type="mscrm.dfp_dmfcasebusinessprocessflow" Nullable="false" Partner="dfp_dmfcasebusinessprocessflow_ProcessSession">
           <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="businessprocessflowinstanceid" />
+        </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_role" Type="mscrm.dfp_role" Nullable="false" Partner="dfp_role_ProcessSession">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_roleid" />
+        </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_permission" Type="mscrm.dfp_permission" Nullable="false" Partner="dfp_permission_ProcessSession">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_permissionid" />
         </NavigationProperty>
         <NavigationProperty Name="regardingobjectid_queue" Type="mscrm.queue" Nullable="false" Partner="Queue_ProcessSessions">
           <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="queueid" />
@@ -20696,6 +20846,12 @@
         <NavigationProperty Name="regardingobjectid_dfp_dmfcasebusinessprocessflow" Type="mscrm.dfp_dmfcasebusinessprocessflow" Nullable="false" Partner="dfp_dmfcasebusinessprocessflow_SyncErrors">
           <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="businessprocessflowinstanceid" />
         </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_role" Type="mscrm.dfp_role" Nullable="false" Partner="dfp_role_SyncErrors">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_roleid" />
+        </NavigationProperty>
+        <NavigationProperty Name="regardingobjectid_dfp_permission" Type="mscrm.dfp_permission" Nullable="false" Partner="dfp_permission_SyncErrors">
+          <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="dfp_permissionid" />
+        </NavigationProperty>
         <NavigationProperty Name="regardingobjectid_ExpiredProcess_syncerror" Type="mscrm.expiredprocess" Nullable="false" Partner="ExpiredProcess_SyncErrors">
           <ReferentialConstraint Property="_regardingobjectid_value" ReferencedProperty="businessprocessflowinstanceid" />
         </NavigationProperty>
@@ -21682,6 +21838,15 @@
         <NavigationProperty Name="lk_dfp_dmfcasebusinessprocessflow_createdonbehalfby" Type="Collection(mscrm.dfp_dmfcasebusinessprocessflow)" Partner="createdonbehalfby" />
         <NavigationProperty Name="lk_dfp_dmfcasebusinessprocessflow_modifiedby" Type="Collection(mscrm.dfp_dmfcasebusinessprocessflow)" Partner="modifiedby" />
         <NavigationProperty Name="lk_dfp_dmfcasebusinessprocessflow_modifiedonbehalfby" Type="Collection(mscrm.dfp_dmfcasebusinessprocessflow)" Partner="modifiedonbehalfby" />
+        <NavigationProperty Name="lk_dfp_role_createdby" Type="Collection(mscrm.dfp_role)" Partner="createdby" />
+        <NavigationProperty Name="lk_dfp_role_createdonbehalfby" Type="Collection(mscrm.dfp_role)" Partner="createdonbehalfby" />
+        <NavigationProperty Name="lk_dfp_role_modifiedby" Type="Collection(mscrm.dfp_role)" Partner="modifiedby" />
+        <NavigationProperty Name="lk_dfp_role_modifiedonbehalfby" Type="Collection(mscrm.dfp_role)" Partner="modifiedonbehalfby" />
+        <NavigationProperty Name="user_dfp_role" Type="Collection(mscrm.dfp_role)" Partner="owninguser" />
+        <NavigationProperty Name="lk_dfp_permission_createdby" Type="Collection(mscrm.dfp_permission)" Partner="createdby" />
+        <NavigationProperty Name="lk_dfp_permission_createdonbehalfby" Type="Collection(mscrm.dfp_permission)" Partner="createdonbehalfby" />
+        <NavigationProperty Name="lk_dfp_permission_modifiedby" Type="Collection(mscrm.dfp_permission)" Partner="modifiedby" />
+        <NavigationProperty Name="lk_dfp_permission_modifiedonbehalfby" Type="Collection(mscrm.dfp_permission)" Partner="modifiedonbehalfby" />
         <NavigationProperty Name="lk_slakpiinstancebase_createdonbehalfby" Type="Collection(mscrm.slakpiinstance)" Partner="createdonbehalfby" />
         <NavigationProperty Name="lk_mobileofflineprofileitemassocaition_modifiedonbehalfby" Type="Collection(mscrm.mobileofflineprofileitemassociation)" Partner="modifiedonbehalfby" />
         <NavigationProperty Name="lk_userqueryvisualizationbase_modifiedonbehalfby" Type="Collection(mscrm.userqueryvisualization)" Partner="modifiedonbehalfby" />
@@ -22285,6 +22450,7 @@
         <Property Name="subcategory" Type="Edm.String" Unicode="false" />
         <Property Name="percentcomplete" Type="Edm.Int32" />
         <Property Name="crmtaskassigneduniqueid" Type="Edm.Guid" />
+        <Property Name="dfp_origin" Type="Edm.Int32" />
         <Property Name="category" Type="Edm.String" Unicode="false" />
         <NavigationProperty Name="task_PostRegardings" Type="Collection(mscrm.postregarding)" Partner="regardingobjectid_task" />
         <NavigationProperty Name="task_PostFollows" Type="Collection(mscrm.postfollow)" Partner="regardingobjectid_task" />
@@ -22473,6 +22639,7 @@
         <NavigationProperty Name="team_dfp_submittaltype" Type="Collection(mscrm.dfp_submittaltype)" Partner="owningteam" />
         <NavigationProperty Name="team_dfp_comment" Type="Collection(mscrm.dfp_comment)" Partner="owningteam" />
         <NavigationProperty Name="team_dfp_documentextension" Type="Collection(mscrm.dfp_documentextension)" Partner="owningteam" />
+        <NavigationProperty Name="team_dfp_role" Type="Collection(mscrm.dfp_role)" Partner="owningteam" />
         <NavigationProperty Name="team_DuplicateRules" Type="Collection(mscrm.duplicaterule)" Partner="owningteam" />
         <NavigationProperty Name="team_Imports" Type="Collection(mscrm.import)" Partner="owningteam" />
         <NavigationProperty Name="OwningTeam_postfollows" Type="Collection(mscrm.postfollow)" Partner="owningteam" />
@@ -29376,6 +29543,8 @@
           <NavigationPropertyBinding Path="regardingobjectid_dfp_comment" Target="dfp_comments" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_documentextension" Target="dfp_documentextensions" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_dmfcasebusinessprocessflow" Target="dfp_dmfcasebusinessprocessflows" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_role" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_permission" Target="dfp_permissions" />
           <NavigationPropertyBinding Path="regardingobjectid_report" Target="reports" />
           <NavigationPropertyBinding Path="AsyncOperation_Emails" Target="emails" />
           <NavigationPropertyBinding Path="regardingobjectid_recurringappointmentmaster" Target="recurringappointmentmasters" />
@@ -29948,6 +30117,8 @@
           <NavigationPropertyBinding Path="regardingobjectid_dfp_comment" Target="dfp_comments" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_documentextension" Target="dfp_documentextensions" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_dmfcasebusinessprocessflow" Target="dfp_dmfcasebusinessprocessflows" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_role" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_permission" Target="dfp_permissions" />
           <NavigationPropertyBinding Path="regardingobjectid_customeraddress" Target="customeraddresses" />
           <NavigationPropertyBinding Path="regardingobjectid_annualfiscalcalendar" Target="annualfiscalcalendars" />
           <NavigationPropertyBinding Path="regardingobjectid_fax" Target="faxes" />
@@ -30145,6 +30316,7 @@
           <NavigationPropertyBinding Path="dfp_businessunit_bcgov_documenturl" Target="bcgov_documenturls" />
           <NavigationPropertyBinding Path="business_unit_dfp_comment" Target="dfp_comments" />
           <NavigationPropertyBinding Path="business_unit_dfp_documentextension" Target="dfp_documentextensions" />
+          <NavigationPropertyBinding Path="business_unit_dfp_role" Target="dfp_roles" />
           <NavigationPropertyBinding Path="BusinessUnit_SyncErrors" Target="syncerrors" />
           <NavigationPropertyBinding Path="transactioncurrencyid" Target="transactioncurrencies" />
           <NavigationPropertyBinding Path="BulkDeleteOperation_BusinessUnit" Target="bulkdeleteoperations" />
@@ -31082,6 +31254,7 @@
           <NavigationPropertyBinding Path="dfp_login_PrincipalObjectAttributeAccesses" Target="principalobjectattributeaccessset" />
           <NavigationPropertyBinding Path="dfp_login_dfp_medicalpractitioner" Target="dfp_medicalpractitioners" />
           <NavigationPropertyBinding Path="dfp_DriverId" Target="dfp_drivers" />
+          <NavigationPropertyBinding Path="dfp_login_dfp_role" Target="dfp_roles" />
         </EntitySet>
         <EntitySet Name="dfp_medicalconditions" EntityType="Microsoft.Dynamics.CRM.dfp_medicalcondition">
           <NavigationPropertyBinding Path="createdby" Target="systemusers" />
@@ -31197,6 +31370,20 @@
           <NavigationPropertyBinding Path="dfp_PersonId_contact" Target="contacts" />
           <NavigationPropertyBinding Path="dfp_CaseId" Target="incidents" />
         </EntitySet>
+        <EntitySet Name="dfp_permissions" EntityType="Microsoft.Dynamics.CRM.dfp_permission">
+          <NavigationPropertyBinding Path="createdby" Target="systemusers" />
+          <NavigationPropertyBinding Path="createdonbehalfby" Target="systemusers" />
+          <NavigationPropertyBinding Path="modifiedby" Target="systemusers" />
+          <NavigationPropertyBinding Path="modifiedonbehalfby" Target="systemusers" />
+          <NavigationPropertyBinding Path="organizationid" Target="organizations" />
+          <NavigationPropertyBinding Path="dfp_permission_SyncErrors" Target="syncerrors" />
+          <NavigationPropertyBinding Path="dfp_permission_AsyncOperations" Target="asyncoperations" />
+          <NavigationPropertyBinding Path="dfp_permission_MailboxTrackingFolders" Target="mailboxtrackingfolders" />
+          <NavigationPropertyBinding Path="dfp_permission_ProcessSession" Target="processsessions" />
+          <NavigationPropertyBinding Path="dfp_permission_BulkDeleteFailures" Target="bulkdeletefailures" />
+          <NavigationPropertyBinding Path="dfp_permission_PrincipalObjectAttributeAccesses" Target="principalobjectattributeaccessset" />
+          <NavigationPropertyBinding Path="dfp_RoleId" Target="dfp_roles" />
+        </EntitySet>
         <EntitySet Name="dfp_privacies" EntityType="Microsoft.Dynamics.CRM.dfp_privacy">
           <NavigationPropertyBinding Path="createdby" Target="systemusers" />
           <NavigationPropertyBinding Path="createdonbehalfby" Target="systemusers" />
@@ -31212,6 +31399,24 @@
           <NavigationPropertyBinding Path="dfp_privacy_BulkDeleteFailures" Target="bulkdeletefailures" />
           <NavigationPropertyBinding Path="dfp_privacy_PrincipalObjectAttributeAccesses" Target="principalobjectattributeaccessset" />
           <NavigationPropertyBinding Path="dfp_privacy_bcgov_documenturl" Target="bcgov_documenturls" />
+        </EntitySet>
+        <EntitySet Name="dfp_roles" EntityType="Microsoft.Dynamics.CRM.dfp_role">
+          <NavigationPropertyBinding Path="createdby" Target="systemusers" />
+          <NavigationPropertyBinding Path="createdonbehalfby" Target="systemusers" />
+          <NavigationPropertyBinding Path="modifiedby" Target="systemusers" />
+          <NavigationPropertyBinding Path="modifiedonbehalfby" Target="systemusers" />
+          <NavigationPropertyBinding Path="owninguser" Target="systemusers" />
+          <NavigationPropertyBinding Path="owningteam" Target="teams" />
+          <NavigationPropertyBinding Path="ownerid" Target="owners" />
+          <NavigationPropertyBinding Path="owningbusinessunit" Target="businessunits" />
+          <NavigationPropertyBinding Path="dfp_role_SyncErrors" Target="syncerrors" />
+          <NavigationPropertyBinding Path="dfp_role_AsyncOperations" Target="asyncoperations" />
+          <NavigationPropertyBinding Path="dfp_role_MailboxTrackingFolders" Target="mailboxtrackingfolders" />
+          <NavigationPropertyBinding Path="dfp_role_ProcessSession" Target="processsessions" />
+          <NavigationPropertyBinding Path="dfp_role_BulkDeleteFailures" Target="bulkdeletefailures" />
+          <NavigationPropertyBinding Path="dfp_role_PrincipalObjectAttributeAccesses" Target="principalobjectattributeaccessset" />
+          <NavigationPropertyBinding Path="dfp_LoginId" Target="dfp_logins" />
+          <NavigationPropertyBinding Path="dfp_role_dfp_permission" Target="dfp_permissions" />
         </EntitySet>
         <EntitySet Name="dfp_submittaltypes" EntityType="Microsoft.Dynamics.CRM.dfp_submittaltype">
           <NavigationPropertyBinding Path="createdby" Target="systemusers" />
@@ -32798,6 +33003,8 @@
           <NavigationPropertyBinding Path="regardingobjectid_dfp_comment" Target="dfp_comments" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_documentextension" Target="dfp_documentextensions" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_dmfcasebusinessprocessflow" Target="dfp_dmfcasebusinessprocessflows" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_role" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_permission" Target="dfp_permissions" />
           <NavigationPropertyBinding Path="modifiedonbehalfby" Target="systemusers" />
           <NavigationPropertyBinding Path="ownerid" Target="owners" />
           <NavigationPropertyBinding Path="createdonbehalfby" Target="systemusers" />
@@ -33299,6 +33506,7 @@
           <NavigationPropertyBinding Path="organization_dfp_privacy" Target="dfp_privacies" />
           <NavigationPropertyBinding Path="organization_dfp_xsstatuscode" Target="dfp_xsstatuscodes" />
           <NavigationPropertyBinding Path="organization_dfp_dmfcasebusinessprocessflow" Target="dfp_dmfcasebusinessprocessflows" />
+          <NavigationPropertyBinding Path="organization_dfp_permission" Target="dfp_permissions" />
           <NavigationPropertyBinding Path="modifiedonbehalfby" Target="systemusers" />
           <NavigationPropertyBinding Path="organization_sdkmessagefilter" Target="sdkmessagefilters" />
           <NavigationPropertyBinding Path="webresource_organization" Target="webresourceset" />
@@ -33742,6 +33950,8 @@
           <NavigationPropertyBinding Path="objectid_dfp_comment" Target="dfp_comments" />
           <NavigationPropertyBinding Path="objectid_dfp_documentextension" Target="dfp_documentextensions" />
           <NavigationPropertyBinding Path="objectid_dfp_dmfcasebusinessprocessflow" Target="dfp_dmfcasebusinessprocessflows" />
+          <NavigationPropertyBinding Path="objectid_dfp_role" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="objectid_dfp_permission" Target="dfp_permissions" />
           <NavigationPropertyBinding Path="objectid_letter" Target="letters" />
           <NavigationPropertyBinding Path="objectid_reportcategory" Target="reportcategories" />
           <NavigationPropertyBinding Path="objectid_sharepointdocumentlocation" Target="sharepointdocumentlocations" />
@@ -33866,6 +34076,8 @@
           <NavigationPropertyBinding Path="regardingobjectid_dfp_comment" Target="dfp_comments" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_documentextension" Target="dfp_documentextensions" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_dmfcasebusinessprocessflow" Target="dfp_dmfcasebusinessprocessflows" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_role" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_permission" Target="dfp_permissions" />
           <NavigationPropertyBinding Path="regardingobjectid_queue" Target="queues" />
           <NavigationPropertyBinding Path="canceledby" Target="systemusers" />
           <NavigationPropertyBinding Path="regardingobjectid_contact" Target="contacts" />
@@ -35223,6 +35435,8 @@
           <NavigationPropertyBinding Path="regardingobjectid_dfp_comment" Target="dfp_comments" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_documentextension" Target="dfp_documentextensions" />
           <NavigationPropertyBinding Path="regardingobjectid_dfp_dmfcasebusinessprocessflow" Target="dfp_dmfcasebusinessprocessflows" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_role" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="regardingobjectid_dfp_permission" Target="dfp_permissions" />
           <NavigationPropertyBinding Path="regardingobjectid_ExpiredProcess_syncerror" Target="expiredprocesses" />
           <NavigationPropertyBinding Path="regardingobjectid_email_syncerror" Target="emails" />
           <NavigationPropertyBinding Path="regardingobjectid_systemuser" Target="systemusers" />
@@ -35871,6 +36085,15 @@
           <NavigationPropertyBinding Path="lk_dfp_dmfcasebusinessprocessflow_createdonbehalfby" Target="dfp_dmfcasebusinessprocessflows" />
           <NavigationPropertyBinding Path="lk_dfp_dmfcasebusinessprocessflow_modifiedby" Target="dfp_dmfcasebusinessprocessflows" />
           <NavigationPropertyBinding Path="lk_dfp_dmfcasebusinessprocessflow_modifiedonbehalfby" Target="dfp_dmfcasebusinessprocessflows" />
+          <NavigationPropertyBinding Path="lk_dfp_role_createdby" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="lk_dfp_role_createdonbehalfby" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="lk_dfp_role_modifiedby" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="lk_dfp_role_modifiedonbehalfby" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="user_dfp_role" Target="dfp_roles" />
+          <NavigationPropertyBinding Path="lk_dfp_permission_createdby" Target="dfp_permissions" />
+          <NavigationPropertyBinding Path="lk_dfp_permission_createdonbehalfby" Target="dfp_permissions" />
+          <NavigationPropertyBinding Path="lk_dfp_permission_modifiedby" Target="dfp_permissions" />
+          <NavigationPropertyBinding Path="lk_dfp_permission_modifiedonbehalfby" Target="dfp_permissions" />
           <NavigationPropertyBinding Path="lk_slakpiinstancebase_createdonbehalfby" Target="slakpiinstances" />
           <NavigationPropertyBinding Path="lk_mobileofflineprofileitemassocaition_modifiedonbehalfby" Target="mobileofflineprofileitemassociations" />
           <NavigationPropertyBinding Path="lk_userqueryvisualizationbase_modifiedonbehalfby" Target="userqueryvisualizations" />
@@ -36559,6 +36782,7 @@
           <NavigationPropertyBinding Path="team_dfp_submittaltype" Target="dfp_submittaltypes" />
           <NavigationPropertyBinding Path="team_dfp_comment" Target="dfp_comments" />
           <NavigationPropertyBinding Path="team_dfp_documentextension" Target="dfp_documentextensions" />
+          <NavigationPropertyBinding Path="team_dfp_role" Target="dfp_roles" />
           <NavigationPropertyBinding Path="team_DuplicateRules" Target="duplicaterules" />
           <NavigationPropertyBinding Path="team_Imports" Target="imports" />
           <NavigationPropertyBinding Path="OwningTeam_postfollows" Target="postfollows" />

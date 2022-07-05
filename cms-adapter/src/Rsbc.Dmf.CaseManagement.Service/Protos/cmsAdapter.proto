@@ -16,6 +16,8 @@ service CaseManager {
 
   rpc GetCaseDocuments (CaseIdRequest) returns (GetDocumentsReply);
 
+  rpc GetDrivers (EmptyRequest) returns (GetDriversReply);
+
   rpc GetDriverComments (DriverLicenseRequest) returns (GetCommentsReply);
 
   rpc GetDriverDocuments (DriverLicenseRequest) returns (GetDocumentsReply);
@@ -80,8 +82,15 @@ message LegacyDocument {
 	string UserId = 4;
 	string CaseId = 5;
 	string DocumentId = 6;
-	google.protobuf.Timestamp DocumentDate = 7;
-	Driver Driver = 8;
+	google.protobuf.Timestamp FaxReceivedDate = 7;
+	google.protobuf.Timestamp ImportDate = 8;
+	string ImportId = 9;
+	Driver Driver = 10;
+	string BatchId = 11;
+	string OriginatingNumber = 12;
+	int64 DocumentPages = 13;
+	string ValidationMethod = 14;
+	string ValidationPrevious = 15;
 }
 
 
@@ -274,6 +283,12 @@ message UsersSearchReply {
 	repeated User user = 10;
 }
 
+message GetDriversReply {
+	ResultStatus resultStatus = 1;
+	string errorDetail = 2;
+	repeated Driver items = 10;
+}
+
 message UserLoginRequest {
 	string externalSystemUserId = 1;
 	string externalSystem = 2;
@@ -296,6 +311,7 @@ message User {
 	string externalSystem = 3;
 	string firstName = 10;
 	string lastName = 11;
+	repeated string roles = 12;
 	repeated UserProfile linkedProfiles = 20;
 }
 

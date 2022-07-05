@@ -20,73 +20,7 @@ using System.Web;
 
 namespace Rsbc.Dmf.IcbcAdapter.Tests
 {
-    public class CustomWebApplicationFactory<TStartup>
-        : WebApplicationFactory<Startup>
-    {
-        public IConfiguration Configuration;
-
-        protected override void ConfigureWebHost(IWebHostBuilder builder)
-        {
-            Configuration = new ConfigurationBuilder()
-                .AddUserSecrets<Startup>()
-                .AddEnvironmentVariables()
-                .Build();
-
-            builder
-                .UseSolutionRelativeContentRoot("")
-                .UseEnvironment("Staging")
-                .UseConfiguration(Configuration)
-                .UseStartup<Startup>();
-        }
-    }
-
-    public abstract class ApiIntegrationTestBaseWithLogin : IClassFixture<CustomWebApplicationFactory<Startup>>
-    {
-        protected readonly CustomWebApplicationFactory<Startup> _factory;
-
-        protected HttpClient _client { get; }
-
-        protected readonly IConfiguration Configuration;
-
-        public ApiIntegrationTestBaseWithLogin(CustomWebApplicationFactory<Startup> fixture)
-        {
-            _factory = fixture;
-            Configuration = new ConfigurationBuilder()
-                .AddUserSecrets<Startup>() // Add secrets from the service.
-                .AddEnvironmentVariables()
-                .Build();
-            // determine if this is an external or internal test.
-            if (Configuration["TEST_BASE_URI"] != null)
-            {
-                // allow self signed certificates
-                var handler = new HttpClientHandler();
-                handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-                handler.ServerCertificateCustomValidationCallback =
-                    (httpRequestMessage, cert, cetChain, policyErrors) =>
-                    {
-                        return true;
-                    };
-
-                _client = new HttpClient(handler)
-                {
-                    BaseAddress = new Uri(Configuration["TEST_BASE_URI"])
-                };
-            }
-
-            else // local test
-            {
-                _factory = fixture;
-                _client = _factory
-                    .CreateClient(new WebApplicationFactoryClientOptions
-                    {
-                        AllowAutoRedirect = false,
-                    });
-
-            }
-        }
-    }
-
-
+  
     public class DynamicsInterfaceTest : ApiIntegrationTestBaseWithLogin
     {
 
@@ -94,28 +28,6 @@ namespace Rsbc.Dmf.IcbcAdapter.Tests
             : base(factory)
         { }
 
-
-        private async void Login()
-        {            
-            // determine if authentication is enabled.
-
-            if (!string.IsNullOrEmpty(Configuration["JWT_TOKEN_KEY"]))
-            {
-                string encodedSecret = HttpUtility.UrlEncode(Configuration["JWT_TOKEN_KEY"]);
-                var request = new HttpRequestMessage(HttpMethod.Get, "/Authentication/Token?secret=" + encodedSecret);
-                var response = _client.SendAsync(request).GetAwaiter().GetResult();
-                response.EnsureSuccessStatusCode();
-
-                var token = await response.Content.ReadAsStringAsync();
-
-                if (!string.IsNullOrEmpty(token))
-                {
-                    // Add the bearer token to the client.
-                    _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
-                }
-            }
-
-        }
 
         private async void TestDl(string testDl)
         {
@@ -129,17 +41,18 @@ namespace Rsbc.Dmf.IcbcAdapter.Tests
 
             Driver clientResult = JsonConvert.DeserializeObject<Driver>(jsonString);
 
-
+            int result = 0;
+            int.TryParse(testDl, out result);
             // content should match
 
-            Assert.Equal(clientResult.DriverMasterStatus.LicenceNumber.Value, int.Parse(testDl));
+            Assert.Equal(clientResult.DriverMasterStatus.LicenceNumber.Value, result);
         }
 
         /// <summary>
         /// Test the MS Dynamics interface
         /// </summary>
         [Fact]
-        public async void TestDriverHistory()
+        public void TestDriverHistory()
         {
             string testDl = Configuration["ICBC_TEST_DL"];
 

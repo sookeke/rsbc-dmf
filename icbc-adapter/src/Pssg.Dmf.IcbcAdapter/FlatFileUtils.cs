@@ -47,8 +47,7 @@ namespace Rsbc.Dmf.IcbcAdapter
         {
             return string.IsNullOrEmpty(host) ||
                 string.IsNullOrEmpty(username) ||
-                !(string.IsNullOrEmpty(password) &&
-                string.IsNullOrEmpty(key));
+                string.IsNullOrEmpty(key);
         }
 
         private ConnectionInfo GetConnectionInfo (string host, string username, string password, string keyUser, string key)
@@ -89,7 +88,7 @@ namespace Rsbc.Dmf.IcbcAdapter
             string keyUser = _configuration["SCP_KEY_USER"];
             string key = _configuration["SCP_KEY"];
 
-            if (!CheckScpSettings(host, username, password, key))
+            if (CheckScpSettings(host, username, password, key))
             {
                 LogStatement(hangfireContext, "No SCP configuration, skipping operation.");
             }
@@ -102,7 +101,7 @@ namespace Rsbc.Dmf.IcbcAdapter
                     client.Connect();
                     LogStatement(hangfireContext, "Connected.");
 
-                    var files = client.ListDirectory(".");
+                    var files = client.ListDirectory(client.WorkingDirectory);
 
                     foreach (var file in files)
                     {
@@ -134,7 +133,9 @@ namespace Rsbc.Dmf.IcbcAdapter
             string keyUser = _configuration["SCP_KEY_USER"];
             string key = _configuration["SCP_KEY"];
 
-            if (!CheckScpSettings(host, username, password, key))
+            string folder = _configuration["SCP_FOLDER"];
+
+            if (CheckScpSettings(host, username, password, key))
             {
                 LogStatement (hangfireContext, "No SCP configuration, skipping check for work.");
             }
@@ -147,7 +148,12 @@ namespace Rsbc.Dmf.IcbcAdapter
                     client.Connect();
                     LogStatement(hangfireContext, "Connected.");
 
-                    var files = client.ListDirectory(".");
+                    if (string.IsNullOrEmpty(folder))
+                    {
+                        folder = client.WorkingDirectory;
+                    }
+
+                    var files = client.ListDirectory(folder);
 
                     foreach (var file in files)
                     {
@@ -156,7 +162,7 @@ namespace Rsbc.Dmf.IcbcAdapter
                         client.DownloadFile(file.FullName, memoryStream);
 
                         string data = StringUtility.StreamToString(memoryStream);
-                        
+                        LogStatement(hangfireContext, data);
                         ProcessCandidates(hangfireContext, data);
 
                     }
@@ -172,6 +178,9 @@ namespace Rsbc.Dmf.IcbcAdapter
             var engine = new FileHelperEngine<NewDriver>();
             engine.Options.IgnoreLastLines = 1;
             var records = engine.ReadString(data);
+            
+            LogStatement(hangfireContext, $"{records.Length} records were found.");
+            
             foreach (var record in records)
             {
                 LogStatement(hangfireContext, $"Found record {record.LicenseNumber} {record.Surname}");
@@ -182,7 +191,7 @@ namespace Rsbc.Dmf.IcbcAdapter
                     Surname = record.Surname,
                     ClientNumber = record.ClientNumber,
                 };
-                _caseManagerClient.ProcessLegacyCandidate(lcr);
+                //_caseManagerClient.ProcessLegacyCandidate(lcr);
             }
         }
 
@@ -202,7 +211,7 @@ namespace Rsbc.Dmf.IcbcAdapter
             string keyUser = _configuration["SCP_KEY_USER"];
             string key = _configuration["SCP_KEY"];
 
-            if (!CheckScpSettings(host, username, password, key))
+            if (CheckScpSettings(host, username, password, key))
             {
                 LogStatement(hangfireContext, "No SCP configuration, skipping operation.");
             }
@@ -251,42 +260,47 @@ namespace Rsbc.Dmf.IcbcAdapter
         {
             List<MedicalUpdate> data = new List<MedicalUpdate>();
 
-            
             foreach (DmerCase item in unsentItems.Items)
             {
                 // Start by getting the current status for the given driver.  If the medical disposition matches, do not proceed.
-
-                // (TODO)
-
-                var newUpdate = new MedicalUpdate()
-                {
-                     LicenseNumber = item.Driver.DriverLicenseNumber,
-                     Surname = item.Driver.Surname,                     
-                };
-
-                var firstDecision = item.Decisions.OrderByDescending(x => x.CreatedOn).FirstOrDefault();
                 
-                if (firstDecision != null)
+                if (item.Driver != null)
                 {
-                    if (firstDecision.Outcome == DecisionItem.Types.DecisionOutcomeOptions.FitToDrive)
+                    var newUpdate = new MedicalUpdate()
                     {
-                        newUpdate.MedicalDisposition = "P";
+                        LicenseNumber = item.Driver.DriverLicenseNumber,
+                        Surname = item.Driver.Surname,
+                    };
+
+                    var firstDecision = item.Decisions.OrderByDescending(x => x.CreatedOn).FirstOrDefault();
+
+                    if (firstDecision != null)
+                    {
+                        if (firstDecision.Outcome == DecisionItem.Types.DecisionOutcomeOptions.FitToDrive)
+                        {
+                            newUpdate.MedicalDisposition = "P";
+                        }
+                        else
+                        {
+                            newUpdate.MedicalDisposition = "J";
+                        }
                     }
                     else
                     {
                         newUpdate.MedicalDisposition = "J";
                     }
+
+                    DateTime? adjustedDate = DateUtility.FormatDatePacific(DateTimeOffset.UtcNow);
+
+                    newUpdate.MedicalIssueDate = adjustedDate.Value.ToString("yyyyMMddHHmmss");
+
+                    data.Add(newUpdate);
                 }
                 else
                 {
-                    newUpdate.MedicalDisposition = "J";
+                    Log.Logger.Information($"Case {item.CaseId} {item.Title} has no Driver..");
                 }
-
-                DateTime? adjustedDate = DateUtility.FormatDatePacific(DateTimeOffset.UtcNow);
-
-                newUpdate.MedicalIssueDate = adjustedDate.Value.ToString("yyyyMMddHHmmss");
-
-                data.Add(newUpdate);
+                
             }
 
             return data;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Google.Protobuf.WellKnownTypes;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -49,7 +50,10 @@ namespace Rsbc.Dmf.LegacyAdapter.Controllers
             {                
                 foreach (var item in reply.Items)
                 {
-                    caseId = item.CaseId;
+                    if ((bool)(item.Driver?.Surname.StartsWith (surcode)))
+                    {
+                        caseId = item.CaseId;
+                    }
                 }                
             }
             return Json(caseId);
@@ -160,7 +164,8 @@ namespace Rsbc.Dmf.LegacyAdapter.Controllers
                     result.Add(new ViewModels.Document
                     {
                         CaseId = item.CaseId,
-                        DocumentDate = item.DocumentDate.ToDateTimeOffset(),
+                        FaxReceivedDate = item.FaxReceivedDate.ToDateTimeOffset(),
+                        ImportDate = item.ImportDate.ToDateTimeOffset(),
                         DocumentId = item.DocumentId,
                         FileContents = data,
                         Driver = driver,
@@ -186,22 +191,68 @@ namespace Rsbc.Dmf.LegacyAdapter.Controllers
         /// Add a document to a case
         /// </summary>
         /// <param name="caseId"></param>
-        /// <param name="licenseNumber"></param>
+        /// <param name="driversLicense"></param>
         /// <param name="surcode"></param>
         /// <param name="file"></param>
         /// <returns></returns>
         [HttpPost("{caseId}/Documents")]
         // allow large uploads
         [DisableRequestSizeLimit]
-        public async Task<IActionResult> UpdateCaseDocuments([FromRoute] string caseId, [FromForm] string licenseNumber, [FromForm] string surcode,
+        public async Task<IActionResult> AddCaseDocument([FromRoute] string caseId,  // GUID
+            [FromForm] string driversLicense,  // Driver -> DL
+            [FromForm] string surcode,         // Driver -> Lastname
+            [FromForm] string batchId,         // add to document entity
+            [FromForm] DateTimeOffset faxReceivedDate,  // dfp_faxreceivedate
+            [FromForm] DateTimeOffset importDate,  // dfp_dpsprocessingdate
+            [FromForm] string importID, // add to document entity
+            [FromForm] string originatingNumber, // dfp_faxnumber
+            [FromForm] int documentPages, // add to document entity
+            [FromForm] string documentType, // dfp_documenttypeid
+            [FromForm] string validationMethod, // add to document entity
+            [FromForm] string validationPrevious, // add to document entity
             [FromForm] IFormFile file)
         {
-            return Ok();
+            var driver = new CaseManagement.Service.Driver()
+            {
+                DriverLicenseNumber = driversLicense
+            };
+
+            // TODO fetch driver from ICBC
+
+            var document = new LegacyDocument()
+            {
+                BatchId = batchId ?? String.Empty,
+                DocumentPages = documentPages,
+                DocumentTypeCode = documentType,
+
+                CaseId = caseId ?? string.Empty,
+                FaxReceivedDate = Timestamp.FromDateTimeOffset(faxReceivedDate),
+                ImportDate = Timestamp.FromDateTimeOffset(importDate),
+                ImportId = importID ?? string.Empty,
+
+                OriginatingNumber = originatingNumber ?? string.Empty,
+                Driver = driver,
+                ValidationMethod = validationMethod ?? string.Empty,
+                ValidationPrevious = validationPrevious ?? string.Empty
+            };
+
+            var result = _cmsAdapterClient.CreateLegacyCaseDocument(document);
+
+            if (result.ResultStatus == CaseManagement.Service.ResultStatus.Success)
+            {
+                var actionName = nameof(AddCaseDocument);
+                var routeValues = new
+                {
+                    driversLicence = driversLicense
+                };
+
+                return CreatedAtAction(actionName, routeValues, document);
+            }
+            else
+            {
+                return StatusCode(500);
+            }
         }
-        
-
-        
-
 
     }
 }

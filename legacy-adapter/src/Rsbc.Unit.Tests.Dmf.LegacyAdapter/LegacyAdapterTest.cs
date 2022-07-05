@@ -12,6 +12,8 @@ using Newtonsoft.Json;
 using Xunit;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
+using System.Web;
+using System.Net;
 
 namespace Rsbc.Unit.Tests.Dmf.LegacyAdapter
 {
@@ -79,6 +81,30 @@ namespace Rsbc.Unit.Tests.Dmf.LegacyAdapter
 
             }
         }
+
+
+        protected void Login()
+        {
+            // determine if authentication is enabled.
+
+            if (!string.IsNullOrEmpty(Configuration["JWT_TOKEN_KEY"]))
+            {
+                string encodedSecret = HttpUtility.UrlEncode(Configuration["JWT_TOKEN_KEY"]);
+                var request = new HttpRequestMessage(HttpMethod.Get, "/Authentication/Token?secret=" + encodedSecret);
+                var response = _client.SendAsync(request).GetAwaiter().GetResult();
+                response.EnsureSuccessStatusCode();
+
+                var token = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                if (!string.IsNullOrEmpty(token))
+                {
+                    // Add the bearer token to the client.
+                    _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+                }
+            }
+
+
+        }
     }
 
 
@@ -95,11 +121,6 @@ namespace Rsbc.Unit.Tests.Dmf.LegacyAdapter
         }
 
 
-        private void Login()
-        {
-            // TODO - do a JWT login
-
-        }
 
         /// <summary>
         /// Test the MS Dynamics interface
@@ -229,7 +250,43 @@ namespace Rsbc.Unit.Tests.Dmf.LegacyAdapter
             Assert.True(found);
         }
 
-        [Fact]
+       // {"userId":"IDIR\\SMILLAR","driver":\{"licenseNumber":"0200103","lastName":"KNI","loadedFromICBC":false,"flag51":false} 
+// ,"sequenceNumber":4,"commentTypeCode":"W","commentText":"test new one"}
+
+
+    [Fact]
+    public async void DfwebSubmitCommentNoCase()
+    {
+        Login();
+
+
+        var request = new HttpRequestMessage(HttpMethod.Post, $"/Drivers/{testDl}/Comments");
+
+        var driver = new Rsbc.Dmf.LegacyAdapter.ViewModels.Driver()
+        { LicenseNumber = testDl, LastName = testSurcode };
+
+        var comment = new Rsbc.Dmf.LegacyAdapter.ViewModels.Comment()
+        {
+            CommentText = "test new one",
+            Driver = driver,
+            SequenceNumber = 4,
+            CommentTypeCode = "W",
+            UserId = "IDIR\\TESTUSER",
+            CaseId = null
+        };
+
+        var stringContent = JsonConvert.SerializeObject(comment);
+
+        request.Content = new StringContent(stringContent, Encoding.UTF8, "application/json");
+
+        var response = _client.SendAsync(request).GetAwaiter().GetResult();
+
+        var responseContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+        response.EnsureSuccessStatusCode();
+    }
+
+    [Fact]
         public async void DfwebGetComments()
         {
             var request = new HttpRequestMessage(HttpMethod.Get, $"/Drivers/{testDl}/Comments");
@@ -257,7 +314,7 @@ namespace Rsbc.Unit.Tests.Dmf.LegacyAdapter
 
             var comment = new Rsbc.Dmf.LegacyAdapter.ViewModels.Document()
             {
-                DocumentDate = DateTimeOffset.Now,
+                FaxReceivedDate = DateTimeOffset.Now,
                 DocumentId = Guid.NewGuid().ToString(),
                 FileContents = bytes,
                 Driver = driver,
@@ -289,8 +346,19 @@ namespace Rsbc.Unit.Tests.Dmf.LegacyAdapter
             response.EnsureSuccessStatusCode();
         }
 
-    }
+        [Fact]
+        public async void TestLoginRequired()
+        {            
 
-    
+            var request = new HttpRequestMessage(HttpMethod.Get, $"/Drivers/{testDl}/Cases");
+
+            var response = _client.SendAsync(request).GetAwaiter().GetResult();
+
+            // should be 401 if there was no login.
+            Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+
+        }
+
+    }
 
 }

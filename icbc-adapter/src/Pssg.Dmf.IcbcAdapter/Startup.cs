@@ -16,7 +16,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Rsbc.Dmf.IcbcAdapter.Services;
-using Pssg.Rsbc.Dmf.DocumentTriage;
 using Rsbc.Dmf.CaseManagement.Service;
 using Serilog;
 using Serilog.Debugging;
@@ -35,6 +34,9 @@ using System.Linq;
 using System.Collections.Generic;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Serilog.Context;
+using Hellang.Middleware.ProblemDetails;
+using Hellang.Middleware.ProblemDetails.Mvc;
+using Pssg.Interfaces;
 
 namespace Rsbc.Dmf.IcbcAdapter
 {
@@ -122,15 +124,26 @@ namespace Rsbc.Dmf.IcbcAdapter
 
             // basic REST controller for Dynamics.
 
-            services.AddControllers(options => {
+            services.AddProblemDetails(ConfigureProblemDetails)
+                
+            .AddControllers(options => {
                 if (_env.IsDevelopment())
                 {
-                    options.Filters.Add(new AllowAnonymousFilter());
+                    options.Filters.Add(new AllowAnonymousFilter());                    
                 }
+
+
+                //options.Filters.Add( typeof(ServerErrorExceptionFilterAttribute));
+
                 options.EnableEndpointRouting = false;
 
 
-                });
+                })
+                    // Adds MVC conventions to work better with the ProblemDetails middleware.
+                    .AddProblemDetailsConventions();
+
+            //GlobalConfiguration.Configuration.Filters.Add(
+            //new ServerErrorExceptionFilterAttribute());
 
             services.AddGrpc(options =>
             {
@@ -143,10 +156,13 @@ namespace Rsbc.Dmf.IcbcAdapter
             services.AddHangfire(x => x.UseMemoryStorage());
             services.AddHangfireServer();
 
+            services.AddEndpointsApiExplorer();
+
             // Swagger is used for API documentation
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ICBC Adapter", Version = "v1" });
+                c.EnableAnnotations();
 
                 string baseUri = Configuration["BASE_URI"];
                 if (baseUri != null)
@@ -221,46 +237,36 @@ namespace Rsbc.Dmf.IcbcAdapter
 
                 var channel = GrpcChannel.ForAddress(cmsAdapterURI, new GrpcChannelOptions { HttpClient = httpClient });
                 services.AddTransient(_ => new CaseManager.CaseManagerClient(channel));
-            }            
-
-            string documentTriageServiceURI = Configuration["DOCUMENT_TRIAGE_SERVICE_URI"];
-
-            if (!string.IsNullOrEmpty(documentTriageServiceURI))
-            {
-                var httpClientHandler = new HttpClientHandler();
-                if (!_env.IsProduction()) // Ignore certificate errors in non-production modes.  
-                                          // This allows you to use OpenShift self-signed certificates for testing.
-                {
-                    // Return `true` to allow certificates that are untrusted/invalid                    
-                    httpClientHandler.ServerCertificateCustomValidationCallback =
-                        HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-                }
-
-                var httpClient = new HttpClient(httpClientHandler);
-                // set default request version to HTTP 2.  Note that Dotnet Core does not currently respect this setting for all requests.
-                httpClient.DefaultRequestVersion = HttpVersion.Version20;
-
-                var initialChannel = GrpcChannel.ForAddress(documentTriageServiceURI, new GrpcChannelOptions { HttpClient = httpClient });
-
-                var initialClient = new DocumentTriage.DocumentTriageClient(initialChannel);
-                // call the token service to get a token.
-                var tokenRequest = new Pssg.Rsbc.Dmf.DocumentTriage.TokenRequest
-                {
-                    Secret = Configuration["DOCUMENT_TRIAGE_SERVICE_JWT_SECRET"]
-                };
-
-                var tokenReply = initialClient.GetToken(tokenRequest);
-
-                if (tokenReply != null && tokenReply.ResultStatus == Pssg.Rsbc.Dmf.DocumentTriage.ResultStatus.Success)
-                {
-                    // Add the bearer token to the client.
-                    httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {tokenReply.Token}");
-
-                    var channel = GrpcChannel.ForAddress(documentTriageServiceURI, new GrpcChannelOptions { HttpClient = httpClient });
-
-                    services.AddTransient(_ => new DocumentTriage.DocumentTriageClient(channel));
-                }
             }
+
+            if (Configuration["ICBC_LOOKUP_SERVICE_URI"] != null)
+            {
+                services.AddTransient(_ => new IcbcClient(Configuration));
+            }
+
+        }
+
+        private void ConfigureProblemDetails(ProblemDetailsOptions options)
+        {
+            // Only include exception details in a development environment. There's really no nee
+            // to set this as it's the default behavior. It's just included here for completeness :)
+            //options.IncludeExceptionDetails = (ctx, ex) => Environment.IsDevelopment();
+            options.IncludeExceptionDetails = (ctx, ex) => false;
+
+
+            // You can configure the middleware to re-throw certain types of exceptions, all exceptions or based on a predicate.
+            // This is useful if you have upstream middleware that needs to do additional handling of exceptions.
+            options.Rethrow<NotSupportedException>();
+
+            // This will map NotImplementedException to the 501 Not Implemented status code.
+            options.MapToStatusCode<NotImplementedException>(StatusCodes.Status501NotImplemented);
+
+            // This will map HttpRequestException to the 503 Service Unavailable status code.
+            options.MapToStatusCode<HttpRequestException>(StatusCodes.Status503ServiceUnavailable);
+
+            // Because exceptions are handled polymorphically, this will act as a "catch all" mapping, which is why it's added last.
+            // If an exception other than NotImplementedException and HttpRequestException is thrown, this will handle it.
+            options.MapToStatusCode<Exception>(StatusCodes.Status500InternalServerError);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -268,12 +274,14 @@ namespace Rsbc.Dmf.IcbcAdapter
         {
             if (!env.IsProduction()) {
                 
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
 
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ICBC Adapter v1"));
 
             }
+
+            app.UseProblemDetails();
 
             app.UseForwardedHeaders();
 
@@ -286,7 +294,7 @@ namespace Rsbc.Dmf.IcbcAdapter
             // do not start Hangfire if we are running tests.        
             foreach (var assem in Assembly.GetEntryAssembly().GetReferencedAssemblies())
             {
-                if (assem.FullName.ToLowerInvariant().StartsWith("xunit"))
+                if (assem.FullName.ToLowerInvariant().StartsWith("xunit") || assem.FullName.Contains("Unit.Tests"))
                 {
                     startHangfire = false;
                     break;
@@ -377,7 +385,7 @@ namespace Rsbc.Dmf.IcbcAdapter
                     .Enrich.WithExceptionDetails()
                     .WriteTo.Console()
                     .WriteTo.EventCollector(Configuration["SPLUNK_COLLECTOR_URL"],
-                        sourceType: "documentstorage", eventCollectorToken: Configuration["SPLUNK_TOKEN"],
+                        sourceType: "icbc-adapter", eventCollectorToken: Configuration["SPLUNK_TOKEN"],
                         restrictedToMinimumLevel: LogEventLevel.Information,
 #pragma warning disable CA2000 // Dispose objects before losing scope
                         messageHandler: new HttpClientHandler
@@ -390,8 +398,6 @@ namespace Rsbc.Dmf.IcbcAdapter
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     )
                     .CreateLogger();
-
-                
             }
             else
             {
